@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Query</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h1 {
+      color: #bb86fc;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #bb86fc;
+      color: #121212;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #9a6ccc;
+    }
+
+    .history {
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #bb86fc;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #1f1f1f;
+    }
+
+    .history div {
+      margin-bottom: 10px;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #bb86fc;
+      border-radius: 5px;
+      background-color: #1f1f1f;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Query</h1>
+    <input id="userInput" type="text" placeholder="Enter your question or topic...">
+    <button id="submitBtn">Submit</button>
+    <div id="response" class="response" style="display: none;"></div>
+    <div class="history" id="history"></div>
+  </div>
+
+  <script>
+    const baseUrl = "https://241e0d13-3f52-4aae-b348-afd8af36774a-00-1d6496g72y232.sisko.replit.dev"; // Replace with your actual backend URL
+    const historyDiv = document.getElementById('history');
+
+    const addToHistory = (userInput, response) => {
+      const userQuery = `<div><strong>You:</strong> ${marked.parse(userInput)}</div>`;
+      const aiResponse = `<div><strong>AI:</strong> ${marked.parse(response)}</div>`;
+      historyDiv.innerHTML += userQuery + aiResponse;
+    };
+
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const userInput = document.getElementById('userInput').value;
+      const responseDiv = document.getElementById('response');
+
+      if (!userInput.trim()) {
+        responseDiv.style.display = 'block';
+        responseDiv.textContent = 'Please enter a valid input.';
+        return;
+      }
+
+      responseDiv.style.display = 'none';
+      responseDiv.textContent = '';
+
+      try {
+        const response = await fetch(`${baseUrl}/api/query?q=${encodeURIComponent(userInput)}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          const formattedResponse = marked.parse(data.response);
+          responseDiv.style.display = 'block';
+          responseDiv.innerHTML = formattedResponse;
+
+          addToHistory(userInput, data.response);
+        } else {
+          responseDiv.style.display = 'block';
+          responseDiv.textContent = `Error: ${data.error || 'Something went wrong.'}`;
+        }
+      } catch (error) {
+        responseDiv.style.display = 'block';
+        responseDiv.textContent = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
