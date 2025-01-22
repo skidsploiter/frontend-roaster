@@ -112,20 +112,22 @@
 
       try {
         const response = await fetch(`${baseUrl}/api/query?q=${encodeURIComponent(userInput)}`);
+        responseDiv.style.display = 'block';
+        responseDiv.textContent = 'Thinking... 🤔';
         const data = await response.json();
 
         if (response.ok) {
           const formattedResponse = marked.parse(data.response);
-          responseDiv.style.display = 'block';
+          //responseDiv.style.display = 'block';
           responseDiv.innerHTML = formattedResponse;
 
           addToHistory(userInput, data.response);
         } else {
-          responseDiv.style.display = 'block';
+         // responseDiv.style.display = 'block';
           responseDiv.textContent = `Error: ${data.error || 'Something went wrong.'}`;
         }
       } catch (error) {
-        responseDiv.style.display = 'block';
+        // responseDiv.style.display = 'block';
         responseDiv.textContent = `Error: ${error.message}`;
       }
     });
